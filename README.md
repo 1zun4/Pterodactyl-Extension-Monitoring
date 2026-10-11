@@ -1,9 +1,9 @@
 # Monitoring for Pterodactyl
 
-[![Release](https://img.shields.io/github/v/release/1zun4/Pterodactyl-Extension-Monitoring?style=flat-square)](https://github.com/1zun4/Pterodactyl-Extension-Monitoring/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/1zun4/Pterodactyl-Extension-Monitoring/total?style=flat-square)](https://github.com/1zun4/Pterodactyl-Extension-Monitoring/releases)
+[![Release](https://img.shields.io/github/v/release/CCBlueX/Pterodactyl-Extension-Monitoring?style=flat-square)](https://github.com/CCBlueX/Pterodactyl-Extension-Monitoring/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/CCBlueX/Pterodactyl-Extension-Monitoring/total?style=flat-square)](https://github.com/CCBlueX/Pterodactyl-Extension-Monitoring/releases)
 [![Pterodactyl](https://img.shields.io/badge/Pterodactyl-2.0-0e4688?style=flat-square)](https://pterodactyl.io)
-[![License](https://img.shields.io/github/license/1zun4/Pterodactyl-Extension-Monitoring?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/CCBlueX/Pterodactyl-Extension-Monitoring?style=flat-square)](LICENSE)
 
 Resource history, alerts and a health page for your panel, nodes and servers.
 
@@ -11,7 +11,7 @@ Resource history, alerts and a health page for your panel, nodes and servers.
 
 ## Install
 
-1. Download `monitoring-<version>.pteroext` from the [latest release](https://github.com/1zun4/Pterodactyl-Extension-Monitoring/releases/latest).
+1. Download `monitoring-<version>.pteroext` from the [latest release](https://github.com/CCBlueX/Pterodactyl-Extension-Monitoring/releases/latest).
 2. Install and enable it under **Admin → Extensions**.
 3. Open a server's **Monitoring** tab. The first samples arrive within 5 minutes.
 
