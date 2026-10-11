@@ -30,7 +30,7 @@ final readonly class History
 
         $samples = Sample::query()
             ->where('server_id', $server->id)
-            ->where('sampled_at', '>=', CarbonImmutable::createFromTimestamp($from - $interval))
+            ->where('sampled_at', '>=', CarbonImmutable::createFromTimestamp($from - $interval, config('app.timezone')))
             ->orderBy('sampled_at')
             ->get()
             ->map(static fn (Sample $sample): array => [
