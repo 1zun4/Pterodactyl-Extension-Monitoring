@@ -58,12 +58,14 @@ export default function ChannelsScreen() {
                 ) : channels.data.length === 0 ? (
                     <p className='mon:text-sm mon:text-muted-foreground'>No channels yet.</p>
                 ) : (
-                    <ul className='mon:grid mon:gap-3'>
+                    <ul className='mon:grid mon:grid-cols-1 mon:gap-3'>
                         {channels.data.map((channel) => (
                             <li key={channel.id} className='mon:flex mon:items-center mon:justify-between mon:gap-3 mon:rounded-sm mon:bg-sunken mon:px-4 mon:py-3'>
                                 <div className='mon:min-w-0'>
-                                    <p className='mon:truncate mon:text-sm mon:text-foreground'>{channel.name}</p>
-                                    <p className='mon:truncate mon:text-xs mon:text-muted-foreground'>
+                                    <p className='mon:truncate mon:text-sm mon:text-foreground' title={channel.name}>
+                                        {channel.name}
+                                    </p>
+                                    <p className='mon:truncate mon:text-xs mon:text-muted-foreground' title={`${TYPES.find((item) => item.value === channel.type)?.label} · ${channel.summary}`}>
                                         {TYPES.find((item) => item.value === channel.type)?.label} · {channel.summary}
                                     </p>
                                 </div>
@@ -91,8 +93,8 @@ export default function ChannelsScreen() {
 
             {editing && (
                 <Dialog open onClose={() => setEditing(null)} title={editing.id ? 'Edit channel' : 'Add channel'} preventExternalClose={saving.isPending}>
-                    <div className='mon:grid mon:gap-4'>
-                        <div className='mon:grid mon:gap-4 mon:sm:grid-cols-2'>
+                    <div className='mon:grid mon:grid-cols-1 mon:gap-4'>
+                        <div className='mon:grid mon:grid-cols-1 mon:gap-4 mon:sm:grid-cols-2'>
                             <div>
                                 <Label htmlFor='mon-name'>Name</Label>
                                 <Input id='mon-name' placeholder='My Discord' value={editing.input.name} onChange={(event) => setEditing({ ...editing, input: { ...editing.input, name: event.currentTarget.value } })} />

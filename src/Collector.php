@@ -49,7 +49,7 @@ final readonly class Collector
                 ];
             }
 
-            foreach (Server::query()->where('node_id', $node->id)->get(['id', 'uuid']) as $server) {
+            foreach (Server::query()->where('node_id', $node->id)->toBase()->get(['id', 'uuid']) as $server) {
                 $state = $states[$server->uuid] ?? null;
 
                 $rows[] = [

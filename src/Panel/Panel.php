@@ -7,6 +7,7 @@ namespace Monitoring\Panel;
 use Illuminate\Support\Facades\Cache;
 use Pterodactyl\Facades\Daemon;
 use Pterodactyl\Models\Node;
+use Pterodactyl\Models\Server;
 use Pterodactyl\Services\Daemon\DaemonConnection;
 use Pterodactyl\Services\Helpers\SoftwareVersionService;
 
@@ -46,9 +47,54 @@ final readonly class Panel
     }
 
     /** @return array<string, mixed> */
-    public function systemInformation(Node $node): array
+    public function systemInformation(int $nodeId): array
     {
-        return Cache::remember("ext:monitoring:system:{$node->id}", 60, static fn (): array => Daemon::node($node)->systemInformation(2));
+        return Cache::remember("ext:monitoring:system:{$nodeId}", 60, static fn (): array => Daemon::node(Node::query()->findOrFail($nodeId))->systemInformation(2));
+    }
+
+    /**
+     * Every node with the settings its capacity is compared against. Memory and disk are MiB.
+     *
+     * @return list<array{id: int, name: string, fqdn: string, memory: int, memory_overallocate: int, disk: int, disk_overallocate: int, data_directory: string}>
+     */
+    public function nodes(): array
+    {
+        return Node::query()->orderBy('name')->get()->map(static fn (Node $node): array => [
+            'id' => $node->id,
+            'name' => $node->name,
+            'fqdn' => $node->fqdn,
+            'memory' => $node->memory,
+            'memory_overallocate' => $node->memory_overallocate,
+            'disk' => $node->disk,
+            'disk_overallocate' => $node->disk_overallocate,
+            'data_directory' => $node->daemonBase,
+        ])->values()->all();
+    }
+
+    /**
+     * Limits of every server, grouped by node ID. Memory and disk are MiB, CPU percent of a thread, 0 means unlimited.
+     *
+     * @return array<int, list<array{id: int, memory: int, disk: int, cpu: int}>>
+     */
+    public function serverLimits(): array
+    {
+        $limits = [];
+
+        foreach (Server::query()->toBase()->get(['id', 'node_id', 'memory', 'disk', 'cpu']) as $server) {
+            $limits[(int) $server->node_id][] = ['id' => (int) $server->id, 'memory' => (int) $server->memory, 'disk' => (int) $server->disk, 'cpu' => (int) $server->cpu];
+        }
+
+        return $limits;
+    }
+
+    public function serverCount(): int
+    {
+        return Server::query()->count();
+    }
+
+    public function nodeCount(): int
+    {
+        return Node::query()->count();
     }
 
     public function latestWings(): string

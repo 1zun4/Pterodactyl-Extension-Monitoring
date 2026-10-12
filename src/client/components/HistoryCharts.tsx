@@ -20,9 +20,9 @@ interface Props {
 
 export default function HistoryCharts({ history, error, range, onRange }: Props) {
     return (
-        <div className='mon:grid mon:gap-4'>
+        <div className='mon:grid mon:grid-cols-1 mon:gap-4'>
             <div className='mon:flex mon:flex-col mon:gap-3 mon:sm:flex-row mon:sm:items-center mon:sm:justify-between'>
-                <p className='mon:text-sm mon:text-muted-foreground'>
+                <p className='mon:min-w-0 mon:text-sm mon:text-muted-foreground'>
                     {history?.uptime != null ? (
                         <>
                             <span className='mon:font-medium mon:text-foreground'>{history.uptime.toFixed(2)}%</span> uptime in the last {RANGES.find((item) => item.value === range)?.label}
@@ -31,7 +31,7 @@ export default function HistoryCharts({ history, error, range, onRange }: Props)
                         'No samples yet. The first one arrives within a few minutes.'
                     )}
                 </p>
-                <div className='mon:flex mon:gap-1' role='group' aria-label='Time range'>
+                <div className='mon:flex mon:flex-wrap mon:gap-1' role='group' aria-label='Time range'>
                     {RANGES.map((item) =>
                         item.value === range ? (
                             <Button key={item.value} size='small' aria-pressed>
@@ -63,7 +63,7 @@ function Charts({ history }: { history: History }) {
     const { limits } = history;
 
     return (
-        <div className='mon:grid mon:gap-4 mon:lg:grid-cols-2'>
+        <div className='mon:grid mon:grid-cols-1 mon:gap-4 mon:lg:grid-cols-2'>
             <ChartBlock title='CPU Load'>
                 <AreaChart times={times} series={[{ key: 'cpu', label: 'CPU', color: 'var(--chart-1)', values: values('cpu') }]} max={limits.cpu || undefined} format={(value) => (value === 0 ? '0%' : `${value.toFixed(value >= 10 ? 0 : 1)}%`)} />
             </ChartBlock>

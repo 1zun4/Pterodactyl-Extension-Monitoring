@@ -1,12 +1,14 @@
+import type { ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageContentBlock, Spinner, Table, TitledGreyBox, httpErrorToHuman, toast } from '@pterodactyl/sdk';
 import { acknowledgeAlert, deleteGlobalRule, getAdmin, keys, saveGlobalRule, type AdminMonitoring, type Health, type NodeHealth, type RuleInput } from '../api';
 import AlertsTable from '../components/AlertsTable';
+import NodeCapacityCard from '../components/NodeCapacityCard';
 import Pill from '../components/Pill';
 import RulesBox from '../components/RulesBox';
 import StatTiles from '../components/StatTiles';
 import UsageBar from '../components/UsageBar';
-import { formatAgo, formatBytes, formatDuration, formatMiB } from '../lib/format';
+import { formatAgo, formatBytes, formatDuration } from '../lib/format';
 
 export default function AdminScreen() {
     const queryClient = useQueryClient();
@@ -30,29 +32,41 @@ export default function AdminScreen() {
             ) : (
                 <>
                     <StatTiles summary={data.data.health} />
-                    <div className='mon:grid mon:gap-6'>
+                    <div className='mon:grid mon:grid-cols-1 mon:gap-6'>
                         <section className='mon:min-w-0'>
-                            <h2 className='mon:mb-3 mon:font-header mon:text-sm mon:font-semibold mon:uppercase mon:tracking-wide mon:text-foreground'>Nodes</h2>
+                            <SectionTitle>Nodes</SectionTitle>
                             <NodesTable nodes={data.data.health.node_list} />
                         </section>
+                        {data.data.health.node_list.length > 0 && (
+                            <section className='mon:min-w-0'>
+                                <SectionTitle>Capacity</SectionTitle>
+                                <div className={`mon:grid mon:grid-cols-1 mon:gap-6 ${data.data.health.node_list.length > 1 ? 'mon:xl:grid-cols-2' : ''}`}>
+                                    {data.data.health.node_list.map((node) => (
+                                        <NodeCapacityCard key={node.id} node={node} wide={data.data.health.node_list.length === 1} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                         <section className='mon:min-w-0'>
-                            <h2 className='mon:mb-3 mon:font-header mon:text-sm mon:font-semibold mon:uppercase mon:tracking-wide mon:text-foreground'>Alerts</h2>
+                            <SectionTitle>Alerts</SectionTitle>
                             <AlertsTable alerts={data.data.alerts} showSubject canAcknowledge pending={acknowledging.isPending} onAcknowledge={(id) => acknowledging.mutate(id)} />
                         </section>
-                        <div className='mon:grid mon:items-start mon:gap-6 mon:lg:grid-cols-3'>
+                        <div className='mon:grid mon:grid-cols-1 mon:min-w-0 mon:items-start mon:gap-6 mon:md:grid-cols-2 mon:xl:grid-cols-3'>
                             <PanelBox health={data.data.health} />
                             <JobsBox health={data.data.health} />
-                            <RulesBox
-                                title='Rules for all servers'
-                                rules={data.data.rules}
-                                channels={data.data.channels}
-                                canManage
-                                global
-                                saving={saving.isPending}
-                                removing={removal.isPending}
-                                onSave={(input, id, done) => saving.mutate({ input, id, done })}
-                                onDelete={(id, done) => removal.mutate({ id, done })}
-                            />
+                            <div className='mon:min-w-0 mon:md:col-span-2 mon:xl:col-span-1'>
+                                <RulesBox
+                                    title='Rules for all servers'
+                                    rules={data.data.rules}
+                                    channels={data.data.channels}
+                                    canManage
+                                    global
+                                    saving={saving.isPending}
+                                    removing={removal.isPending}
+                                    onSave={(input, id, done) => saving.mutate({ input, id, done })}
+                                    onDelete={(id, done) => removal.mutate({ id, done })}
+                                />
+                            </div>
                         </div>
                     </div>
                 </>
@@ -60,6 +74,8 @@ export default function AdminScreen() {
         </PageContentBlock>
     );
 }
+
+const details = (node: NodeHealth) => (node.reachable === false ? `Down since ${formatAgo(node.down_since)}` : [node.os, node.cpu_threads && `${node.cpu_threads} threads`].filter(Boolean).join(' · '));
 
 function NodesTable({ nodes }: { nodes: NodeHealth[] }) {
     return (
@@ -72,9 +88,13 @@ function NodesTable({ nodes }: { nodes: NodeHealth[] }) {
                     id: 'name',
                     label: 'Node',
                     cell: (node) => (
-                        <div className='mon:min-w-0'>
-                            <p className='mon:truncate mon:text-foreground'>{node.name}</p>
-                            <p className='mon:truncate mon:text-xs mon:text-muted-foreground'>{node.reachable === false ? `Down since ${formatAgo(node.down_since)}` : [node.os, node.cpu_threads && `${node.cpu_threads} threads`].filter(Boolean).join(' · ')}</p>
+                        <div className='mon:min-w-0 mon:max-w-44 mon:sm:max-w-xs mon:lg:max-w-md'>
+                            <p className='mon:truncate mon:text-foreground' title={node.name}>
+                                {node.name}
+                            </p>
+                            <p className='mon:truncate mon:text-xs mon:text-muted-foreground' title={details(node)}>
+                                {details(node)}
+                            </p>
                         </div>
                     ),
                 },
@@ -94,26 +114,28 @@ function NodesTable({ nodes }: { nodes: NodeHealth[] }) {
                     ),
                 },
                 { id: 'servers', label: 'Running', cell: (node) => `${node.servers.running} / ${node.servers.total}` },
-                {
-                    id: 'usage',
-                    label: 'Usage',
-                    cell: (node) => (
-                        <div className='mon:grid mon:min-w-40 mon:gap-2'>
-                            <UsageBar label={`Memory ${formatMiB(node.memory.used)} of ${formatMiB(node.memory.total)}`} used={node.memory.used} total={node.memory.total} />
-                            <UsageBar label={`Disk ${formatMiB(node.disk.used)} of ${formatMiB(node.disk.total)}`} used={node.disk.used} total={node.disk.total} />
-                        </div>
-                    ),
-                },
             ]}
         />
     );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function SectionTitle({ children }: { children: ReactNode }) {
+    return <h2 className='mon:mb-3 mon:font-header mon:text-sm mon:font-semibold mon:uppercase mon:tracking-wide mon:text-foreground'>{children}</h2>;
+}
+
+/** A label and value on one line. Long text truncates with the full text on hover, `wrap` lets the value wrap instead. */
+function Row({ label, title, wrap = false, children }: { label: string; title?: string | null; wrap?: boolean; children: ReactNode }) {
     return (
-        <div className='mon:flex mon:items-center mon:justify-between mon:gap-3'>
-            <span className='mon:text-muted-foreground'>{label}</span>
-            <span className='mon:truncate mon:text-right mon:text-foreground'>{children}</span>
+        <div className='mon:flex mon:min-w-0 mon:items-start mon:justify-between mon:gap-3'>
+            <span className='mon:min-w-0 mon:truncate mon:text-muted-foreground' title={label}>
+                {label}
+            </span>
+            <span
+                className={`mon:min-w-0 mon:max-w-[65%] mon:shrink-0 mon:text-right mon:text-foreground ${wrap ? 'mon:flex mon:flex-wrap mon:justify-end mon:gap-x-2' : 'mon:truncate'}`}
+                title={title ?? (typeof children === 'string' ? children : undefined)}
+            >
+                {children}
+            </span>
         </div>
     );
 }
@@ -123,13 +145,17 @@ function PanelBox({ health }: { health: Health }) {
 
     return (
         <TitledGreyBox title='Panel'>
-            <div className='mon:grid mon:gap-3 mon:text-sm'>
+            <div className='mon:grid mon:grid-cols-1 mon:gap-3 mon:text-sm'>
                 <Row label='Version'>{versions.panel}</Row>
                 <Row label='PHP'>{versions.php}</Row>
-                {versions.database && <Row label='Database'>{versions.database}</Row>}
+                {versions.database && (
+                    <Row label='Database' title={versions.database_full}>
+                        {versions.database}
+                    </Row>
+                )}
                 {versions.redis && <Row label='Redis'>{versions.redis}</Row>}
                 {host.uptime !== null && <Row label='Host uptime'>{formatDuration(host.uptime)}</Row>}
-                {host.load && <Row label='Load'>{host.load.map((value) => value.toFixed(2)).join(' · ') + (host.cpus ? ` (${host.cpus} CPUs)` : '')}</Row>}
+                {host.load && <Row label={host.cpus ? `Load · ${host.cpus} CPUs` : 'Load'}>{host.load.map((value) => value.toFixed(2)).join(' · ')}</Row>}
                 {host.memory && (
                     <UsageBar label={`${host.memory.container ? 'Container memory' : 'Memory'} ${formatBytes(host.memory.used)} of ${formatBytes(host.memory.total)}`} used={host.memory.used} total={host.memory.total} />
                 )}
@@ -146,13 +172,15 @@ function JobsBox({ health }: { health: Health }) {
 
     return (
         <TitledGreyBox title='Background jobs'>
-            <div className='mon:grid mon:gap-3 mon:text-sm'>
+            <div className='mon:grid mon:grid-cols-1 mon:gap-3 mon:text-sm'>
                 <Row label={`Scheduler · ${formatAgo(health.scheduler.at)}`}>{status(health.scheduler.ok)}</Row>
                 <Row label={`Queue worker · ${formatAgo(health.queue.at)}`}>{status(health.queue.ok)}</Row>
-                <Row label='Waiting jobs'>
-                    {Object.entries(health.queues)
-                        .map(([queue, size]) => `${queue} ${size ?? '?'}`)
-                        .join(' · ')}
+                <Row label='Waiting jobs' wrap>
+                    {Object.entries(health.queues).map(([queue, size]) => (
+                        <span key={queue} className='mon:whitespace-nowrap'>
+                            {queue} {size ?? '?'}
+                        </span>
+                    ))}
                 </Row>
                 <Row label='Failed jobs'>{health.failed_jobs > 0 ? <Pill tone='warning'>{health.failed_jobs}</Pill> : '0'}</Row>
             </div>

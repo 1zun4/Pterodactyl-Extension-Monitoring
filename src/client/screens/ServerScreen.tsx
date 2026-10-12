@@ -32,12 +32,12 @@ export default function ServerScreen() {
         <ServerContentBlock title='Monitoring'>
             <HistoryCharts history={history.data} error={history.error} range={range} onRange={setRange} />
             {data.data && (
-                <div className='mon:mt-6 mon:grid mon:gap-6 mon:lg:grid-cols-3'>
+                <div className='mon:mt-6 mon:grid mon:grid-cols-1 mon:gap-6 mon:lg:grid-cols-3'>
                     <section className='mon:min-w-0 mon:lg:col-span-2'>
                         <h2 className='mon:mb-3 mon:font-header mon:text-sm mon:font-semibold mon:uppercase mon:tracking-wide mon:text-foreground'>Alerts</h2>
                         <AlertsTable alerts={data.data.alerts} canAcknowledge={canManage} pending={acknowledging.isPending} onAcknowledge={(id) => acknowledging.mutate(id)} />
                     </section>
-                    <div className='mon:grid mon:content-start mon:gap-6'>
+                    <div className='mon:grid mon:min-w-0 mon:grid-cols-1 mon:content-start mon:gap-6'>
                         <RulesBox
                             title='Alert rules'
                             rules={data.data.rules}

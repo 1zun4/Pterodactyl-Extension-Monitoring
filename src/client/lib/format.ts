@@ -1,5 +1,16 @@
 export function formatMiB(mib: number): string {
+    if (mib < 0) return `-${formatMiB(-mib)}`;
+    if (mib >= 1048576) return `${(mib / 1048576).toFixed(1)} TiB`;
+
     return mib >= 1024 ? `${(mib / 1024).toFixed(mib >= 10240 ? 0 : 1)} GiB` : `${Math.round(mib)} MiB`;
+}
+
+/** "350 / 768 GiB", or "684 GiB / 5.1 TiB" when the units differ. */
+export function formatMiBPair(part: number, whole: number): string {
+    const [first, second] = [formatMiB(part), formatMiB(whole)];
+    const unit = second.slice(second.lastIndexOf(' '));
+
+    return first.endsWith(unit) ? `${first.slice(0, -unit.length)} / ${second}` : `${first} / ${second}`;
 }
 
 export function formatBytes(bytes: number): string {

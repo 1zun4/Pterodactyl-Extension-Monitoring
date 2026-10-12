@@ -28,12 +28,12 @@ export default function RuleDialog({ rule, channels, global = false, pending, on
 
     return (
         <Dialog open onClose={onClose} title={rule ? 'Edit alert rule' : 'New alert rule'} preventExternalClose={pending}>
-            <div className='mon:grid mon:gap-4'>
+            <div className='mon:grid mon:grid-cols-1 mon:gap-4'>
                 <div>
                     <Label htmlFor='mon-metric'>Alert when</Label>
                     <Select id='mon-metric' value={input.metric} onChange={(value) => set({ metric: value as Metric })} options={METRICS.filter((metric) => global || !metric.global)} />
                 </div>
-                <div className='mon:grid mon:gap-4 mon:sm:grid-cols-3'>
+                <div className={`mon:grid mon:grid-cols-1 mon:gap-4 mon:sm:items-end ${usesThreshold ? 'mon:sm:grid-cols-3' : 'mon:sm:grid-cols-2'}`}>
                     {usesThreshold && (
                         <div>
                             <Label htmlFor='mon-threshold'>Above (%)</Label>

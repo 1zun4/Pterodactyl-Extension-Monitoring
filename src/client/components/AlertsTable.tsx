@@ -31,16 +31,16 @@ export default function AlertsTable({ alerts, showSubject = false, canAcknowledg
                               label: 'Server',
                               cell: (alert: Alert) =>
                                   alert.server ? (
-                                      <PanelLink destination={{ extension: 'monitoring', screen: 'server', params: { id: alert.server.identifier } }} className='mon:text-foreground mon:hover:underline'>
+                                      <PanelLink destination={{ extension: 'monitoring', screen: 'server', params: { id: alert.server.identifier } }} className='mon:block mon:min-w-32 mon:text-foreground mon:hover:underline'>
                                           {alert.server.name}
                                       </PanelLink>
                                   ) : (
-                                      `Node ${alert.node ?? ''}`
+                                      <span className='mon:block mon:min-w-32'>{`Node ${alert.node ?? ''}`}</span>
                                   ),
                           },
                       ]
                     : []),
-                { id: 'rule', label: 'Rule', cell: (alert) => alert.rule },
+                { id: 'rule', label: 'Rule', cell: (alert) => <span className='mon:block mon:min-w-40'>{alert.rule}</span> },
                 {
                     id: 'value',
                     label: 'Peak',
@@ -49,12 +49,23 @@ export default function AlertsTable({ alerts, showSubject = false, canAcknowledg
                 {
                     id: 'started',
                     label: 'Started',
-                    cell: (alert) => <span title={new Date(alert.started_at).toLocaleString()}>{formatAgo(alert.started_at)}</span>,
+                    cell: (alert) => (
+                        <span className='mon:whitespace-nowrap' title={new Date(alert.started_at).toLocaleString()}>
+                            {formatAgo(alert.started_at)}
+                        </span>
+                    ),
                 },
                 {
                     id: 'resolved',
                     label: 'Resolved',
-                    cell: (alert) => (alert.resolved_at ? <span title={new Date(alert.resolved_at).toLocaleString()}>{formatAgo(alert.resolved_at)}</span> : '–'),
+                    cell: (alert) =>
+                        alert.resolved_at ? (
+                            <span className='mon:whitespace-nowrap' title={new Date(alert.resolved_at).toLocaleString()}>
+                                {formatAgo(alert.resolved_at)}
+                            </span>
+                        ) : (
+                            '–'
+                        ),
                 },
                 {
                     id: 'actions',

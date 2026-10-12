@@ -80,7 +80,7 @@ export interface Freshness {
     ok: boolean;
 }
 
-export interface Summary {
+export interface Headline {
     servers: { running: number; total: number };
     nodes: { reachable: number; total: number };
     alerts: number;
@@ -89,10 +89,50 @@ export interface Summary {
     failed_jobs: number;
 }
 
-export interface NodeHealth {
+/** Free and unused are what is left of the total; unused when host usage outside Pterodactyl is unknown. */
+export type SegmentKey = 'servers' | 'other' | 'free' | 'unused';
+
+export interface Segment {
+    key: SegmentKey;
+    mib: number;
+    percent: number;
+}
+
+/** Memory or disk of a node in MiB, see src/Support/Capacity.php. */
+export interface Capacity {
+    total: number;
+    host: boolean;
+    segments: Segment[];
+    allocated: number;
+    allowed: number;
+    overallocate: number;
+    left: number;
+    unlimited: number;
+    warnings: ('physical' | 'low')[];
+}
+
+export interface CpuCapacity {
+    threads: number | null;
+    used: number;
+    allocated: number;
+    unlimited: number;
+    percent: number | null;
+}
+
+export interface NodeCapacity {
     id: number;
     name: string;
     reachable: boolean | null;
+    panel_host: boolean;
+    memory: Capacity;
+    disk: Capacity;
+}
+
+export interface Summary extends Headline {
+    capacity: NodeCapacity[];
+}
+
+export interface NodeHealth extends NodeCapacity {
     error: string | null;
     down_since: string | null;
     version: string | null;
@@ -101,14 +141,13 @@ export interface NodeHealth {
     cpu_threads: number | null;
     containers: { total: number; running: number } | null;
     servers: { running: number; total: number };
-    memory: { used: number; allocated: number; total: number };
-    disk: { used: number; allocated: number; total: number };
+    cpu: CpuCapacity;
 }
 
-export interface Health extends Summary {
+export interface Health extends Headline {
     interval: number;
     queues: Record<string, number | null>;
-    versions: { panel: string; php: string; database: string | null; redis: string | null };
+    versions: { panel: string; php: string; database: string | null; database_full: string | null; redis: string | null };
     host: {
         load: number[] | null;
         cpus: number | null;

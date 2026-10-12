@@ -18,12 +18,14 @@ export default function KumaBox({ push, interval, pending, onSave }: Props) {
     return (
         <TitledGreyBox title='Uptime Kuma'>
             {push && !editing ? (
-                <div className='mon:grid mon:gap-3 mon:text-sm'>
+                <div className='mon:grid mon:grid-cols-1 mon:gap-3 mon:text-sm'>
                     <div className='mon:flex mon:items-center mon:justify-between mon:gap-3'>
-                        <span className='mon:truncate mon:text-foreground'>{push.host}</span>
+                        <span className='mon:min-w-0 mon:truncate mon:text-foreground' title={push.host}>
+                            {push.host}
+                        </span>
                         {push.last_error ? <Pill tone='danger'>Failing</Pill> : push.last_up === null ? <Pill>Waiting</Pill> : push.last_up ? <Pill tone='success'>Up</Pill> : <Pill tone='danger'>Down</Pill>}
                     </div>
-                    <p className='mon:text-xs mon:text-muted-foreground'>{push.last_error ?? `Last heartbeat ${formatAgo(push.pushed_at)}.`}</p>
+                    <p className='mon:text-xs mon:break-words mon:text-muted-foreground'>{push.last_error ?? `Last heartbeat ${formatAgo(push.pushed_at)}.`}</p>
                     <div className='mon:flex mon:justify-end mon:gap-2'>
                         <Button.Text size='small' disabled={pending} onClick={() => onSave(null)}>
                             Remove
@@ -35,7 +37,7 @@ export default function KumaBox({ push, interval, pending, onSave }: Props) {
                 </div>
             ) : (
                 <form
-                    className='mon:grid mon:gap-3'
+                    className='mon:grid mon:grid-cols-1 mon:gap-3'
                     onSubmit={(event) => {
                         event.preventDefault();
                         onSave(url.trim());

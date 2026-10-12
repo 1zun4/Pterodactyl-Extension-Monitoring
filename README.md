@@ -20,10 +20,12 @@ Resource history, alerts and a health page for your panel, nodes and servers.
 - **History**: CPU, memory, disk, network and uptime for up to 90 days, on each server and its admin page.
 - **Alerts**: rules like "memory above 90% for 10 minutes", "server offline" or "node unreachable", with quiet periods.
 - **Notifications**: Discord, Telegram, ntfy, email or any webhook, set up per user under **Account → Alerts**.
-- **Health page**: nodes, background jobs and panel resources at a glance, plus a summary on the admin overview.
+- **Health page**: memory and disk per node as *servers · everything else · free*, what is allocated against what overallocation allows, background jobs and panel versions. A short version sits on the admin overview.
 - **Uptime Kuma**: paste a push monitor URL and the server reports up or down every sample.
 
 ![Admin monitoring](docs/screenshots/admin.png)
+
+> **Everything else** (usage outside Pterodactyl) is only shown for the node the panel runs on: the one node whose memory (±1%), kernel and CPU threads match the panel's machine. Other nodes show servers against capacity.
 
 ## Settings
 

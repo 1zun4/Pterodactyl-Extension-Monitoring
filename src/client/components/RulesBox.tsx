@@ -26,12 +26,14 @@ export default function RulesBox({ title, rules, channels, canManage, global, sa
             {rules.length === 0 ? (
                 <p className='mon:text-sm mon:text-muted-foreground'>No rules yet.</p>
             ) : (
-                <ul className='mon:grid mon:gap-3'>
+                <ul className='mon:grid mon:grid-cols-1 mon:gap-3'>
                     {rules.map((rule) => (
                         <li key={rule.id} className='mon:flex mon:flex-wrap mon:items-center mon:justify-between mon:gap-x-3 mon:gap-y-2'>
                             <div className='mon:min-w-0 mon:flex-1 mon:basis-40'>
-                                <p className='mon:truncate mon:text-sm mon:text-foreground'>{rule.description}</p>
-                                <p className='mon:truncate mon:text-xs mon:text-muted-foreground'>
+                                <p className='mon:truncate mon:text-sm mon:text-foreground' title={rule.description}>
+                                    {rule.description}
+                                </p>
+                                <p className='mon:truncate mon:text-xs mon:text-muted-foreground' title={rule.mine ? undefined : `Set up by ${rule.owner}`}>
                                     {rule.mine ? (rule.channels.length ? `Notifies ${plural(rule.channels.length, 'channel')}` : 'No notifications') : `Set up by ${rule.owner}`}
                                 </p>
                             </div>
